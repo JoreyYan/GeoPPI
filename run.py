@@ -274,7 +274,8 @@ def main():
     # generate the interface residues
     os.system('python gen_interface.py {} {} {} > {}/pymol.log'.format(pdbfile, if_info,workdir,workdir))
     interfacefile = '{}/interface.txt'.format(workdir)
-
+    ################################这个我不用，因为我从前一步中直接得到interface训练结果##########################################
+    
     # Extract mutation information
     graph_mutinfo = []
     flag = False
@@ -285,7 +286,7 @@ def main():
     mutname = info[-1]
     if wildname==mutname:flag= True
     graph_mutinfo.append('{}_{}'.format(chainid,resid))
-
+    ################################以下是用FOLDX 去完成野生型与突变型两个的机构##########################################
     # build a pdb file that is mutated to it self
     with open('individual_list.txt','w') as f:
         cont = '{}{}{}{};'.format(wildname,chainid,resid,wildname)
@@ -305,13 +306,13 @@ def main():
 
     wildtypefile = '{}/wildtype.pdb'.format(workdir, pdb)
     mutantfile = '{}/{}_1.pdb'.format(workdir, pdb)
-
+    ################################用野生和突变分别构建图##########################################
     try:
         A, E, _ =gen_graph_data(wildtypefile, graph_mutinfo, interfacefile , cutoff, if_info)
         A_m, E_m, _=gen_graph_data(mutantfile, graph_mutinfo, interfacefile , cutoff, if_info)
     except:
         print('Data processing error: Please double check your inputs is correct! Such as the pdb file path, mutation information and binding partners. You might find more error details at {}/foldx.log'.format(workdir))
-
+     #########################################################################
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = GeometricEncoder(256)
@@ -320,7 +321,7 @@ def main():
     except:
         print('File reading error: Please redownload the file {} from the GitHub website again!'.format(gnnfile))
 
-
+     ################################引入几何编码器#########################################
     model.to(device)
     model.eval()
     A = A.to(device)
@@ -336,7 +337,7 @@ def main():
                 wget https://media.githubusercontent.com/media/Liuxg16/largefiles/8167d5c365c92d08a81dffceff364f72d765805c/gbt-s4169.pkl -P trainedmodels/'.format(gbtfile))
 
     ddg = GeoPPIpredict(A,E,A_m,E_m, model, forest, sorted_idx,flag)
- 
+ ################################把两种节点和图，以及模型都征尔和到GeoPPIpredict里输出预测结果哦了#########################################
     print('='*40+'Results'+'='*40)
     if ddg<0:
         mutationeffects = 'destabilizing'
