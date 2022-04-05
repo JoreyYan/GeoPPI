@@ -170,7 +170,7 @@ def build_graph(lines, interface_res, mutinfo, cutoff=3, max_dis=12, noisedict =
             cr_token = '{}_{}'.format(chainid, res_idx)
             float_cd  = [float(x) for x in coords]
             cd_tensor = torch.tensor(float_cd)
-            #24
+            #24   第24位特征，是是否处于接触面
             if cr_token in interface_res:
                 features[V_atom+V_res] = 1
             
@@ -178,18 +178,18 @@ def build_graph(lines, interface_res, mutinfo, cutoff=3, max_dis=12, noisedict =
                 for inforrr in mutinfo:
                     mut_chainid = inforrr.split('_')[0]
                     if chainid==mut_chainid:
-                        #25
+                        #25  第25位特征，是否处于突变点
                         features[V_atom+V_res+1] = 1
-            #26
+            #26 第26维度特征，是哪一个链上
             features[V_atom+V_res+2] = chain2id[chainid]
 
-            #27
+            #27   res_index_set是空白字典，这里就是将cr_token加入空白字典中，并且字典的value是个数，这里27个特征就是数字1~20代表的序列
             if cr_token not in res_index_set:
                 res_index_set[cr_token] = len(res_index_set)+1
 
             features[V_atom+V_res+3] = res_index_set[cr_token]
 
-            #28
+            #28 
             if atomname=='CA':
                 features[V_atom+V_res+4] = res_index_set[cr_token]
                 if noisedict is not None and cr_token in noisedict:
@@ -209,7 +209,7 @@ def build_graph(lines, interface_res, mutinfo, cutoff=3, max_dis=12, noisedict =
                 features[V_atom+V_res+8]=1
                 flag_mut = True
                 flag = True
-            
+            # 原子的特征维度被添加上了
             if flag:
                 atoms.append(features)
 
